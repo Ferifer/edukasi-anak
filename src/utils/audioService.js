@@ -4,6 +4,9 @@ class AudioService {
     this.enabled = localStorage.getItem("soundEnabled") !== "false";
     this.synthesis = window.speechSynthesis;
     this.voice = null;
+    this.lastSpokenText = null;
+    this.lastSpokenTime = 0;
+    this.debounceDelay = 300; // milliseconds
     this.initVoice();
   }
 
@@ -64,8 +67,21 @@ class AudioService {
   speak(text, options = {}) {
     if (!this.enabled) return;
 
+    // Prevent duplicate speech within debounce delay
+    const now = Date.now();
+    if (
+      this.lastSpokenText === text &&
+      now - this.lastSpokenTime < this.debounceDelay
+    ) {
+      console.log("Duplicate speech prevented:", text);
+      return;
+    }
+
     // Cancel any ongoing speech
     this.synthesis.cancel();
+
+    this.lastSpokenText = text;
+    this.lastSpokenTime = now;
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.voice = this.voice;
