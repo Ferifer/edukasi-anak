@@ -21,6 +21,12 @@ class AudioService {
   setIndonesianVoice() {
     const voices = this.synthesis.getVoices();
 
+    // Log all available voices for debugging (especially useful in Firefox)
+    console.log("Available voices:");
+    voices.forEach((voice, index) => {
+      console.log(`${index}: ${voice.name} (${voice.lang})`);
+    });
+
     // Prioritize Indonesian voices with specific locale codes
     this.voice =
       voices.find((v) => v.lang === "id-ID") || // Indonesian (Indonesia)
@@ -28,12 +34,31 @@ class AudioService {
       voices.find((v) => v.lang.startsWith("id")) || // Fallback to id
       voices.find((v) => v.lang === "ms-MY") || // Malay (similar to Indonesian)
       voices.find((v) => v.name.toLowerCase().includes("indonesia")) || // Search by name
+      voices.find((v) => v.name.toLowerCase().includes("malay")) || // Search Malay by name
       voices[0]; // Last resort fallback
 
     // Log selected voice for debugging
     if (this.voice) {
-      console.log("Voice selected:", this.voice.name, "-", this.voice.lang);
+      console.log("✓ Voice selected:", this.voice.name, "-", this.voice.lang);
+    } else {
+      console.warn("⚠ No voice found, using default");
     }
+  }
+
+  // Get list of available voices
+  getAvailableVoices() {
+    return this.synthesis.getVoices();
+  }
+
+  // Manually set voice by index or name
+  setVoice(voiceIndexOrName) {
+    const voices = this.synthesis.getVoices();
+    if (typeof voiceIndexOrName === "number") {
+      this.voice = voices[voiceIndexOrName];
+    } else {
+      this.voice = voices.find((v) => v.name === voiceIndexOrName);
+    }
+    console.log("Voice changed to:", this.voice?.name, "-", this.voice?.lang);
   }
 
   speak(text, options = {}) {
