@@ -20,11 +20,20 @@ class AudioService {
 
   setIndonesianVoice() {
     const voices = this.synthesis.getVoices();
-    // Try to find Indonesian voice, fallback to English or default
+
+    // Prioritize Indonesian voices with specific locale codes
     this.voice =
-      voices.find((v) => v.lang.startsWith("id")) ||
-      voices.find((v) => v.lang.startsWith("en")) ||
-      voices[0];
+      voices.find((v) => v.lang === "id-ID") || // Indonesian (Indonesia)
+      voices.find((v) => v.lang.startsWith("id-")) || // Any Indonesian variant
+      voices.find((v) => v.lang.startsWith("id")) || // Fallback to id
+      voices.find((v) => v.lang === "ms-MY") || // Malay (similar to Indonesian)
+      voices.find((v) => v.name.toLowerCase().includes("indonesia")) || // Search by name
+      voices[0]; // Last resort fallback
+
+    // Log selected voice for debugging
+    if (this.voice) {
+      console.log("Voice selected:", this.voice.name, "-", this.voice.lang);
+    }
   }
 
   speak(text, options = {}) {
